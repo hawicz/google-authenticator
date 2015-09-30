@@ -79,6 +79,8 @@ typedef struct Params {
   int        debug;
   int        otp_length;
   int        show_counter_in_prompt;
+  int        default_rwindow_size;
+  int        default_window_size;
 } Params;
 
 static char oom;
@@ -1002,9 +1004,7 @@ static int check_scratch_codes(pam_handle_t *pamh,
 
 static int window_size(pam_handle_t *pamh, Params *params) {
   long window;
-  // Default window size is 3. This gives us one STEP_SIZE second
-  // window before and after the current one.
-  long default_value = 3L;
+  long default_value = params->default_window_size;
   if (get_cfg_value_long(pamh, params, "WINDOW_SIZE",
                          default_value, &window) < 0) {
     return 0;
@@ -1019,7 +1019,7 @@ static int window_size(pam_handle_t *pamh, Params *params) {
 
 static int rwindow_size(pam_handle_t *pamh, Params *params) {
   long window;
-  long default_value = 0L;  // No resync window by default.
+  long default_value = params->default_rwindow_size;
   if (get_cfg_value_long(pamh, params, "RWINDOW_SIZE",
                          default_value, &window) < 0) {
     return 0;
@@ -1571,6 +1571,16 @@ static int parse_args(pam_handle_t *pamh, int argc, const char **argv,
         log_message(LOG_ERR, pamh, "Out of range otp_length option \"%s\"", argv[i]);
         return -1;
       }
+    } else if ((rc = parse_int_arg(pamh, argv[i], &params->default_window_size,
+                                   "default_window_size"))) {
+      if (rc < 0) {
+        return -1;
+      }
+    } else if ((rc = parse_int_arg(pamh, argv[i], &params->default_rwindow_size,
+                                   "default_rwindow_size"))) {
+      if (rc < 0) {
+        return -1;
+      }
     } else if (!strcmp(argv[i], "debug")) {
       params->debug = 1;
     } else if (!strcmp(argv[i], "try_first_pass")) {
@@ -1616,6 +1626,9 @@ static int google_authenticator(pam_handle_t *pamh, int flags,
   // Handle optional arguments that configure our PAM module
   Params params = { 0 };
   params.otp_length = -1;
+  // Default window size is 3. This gives us one STEP_SIZE second
+  // window before and after the current one.  (no default for rwindow)
+  params.default_window_size = 3;
 
   if (parse_args(pamh, argc, argv, &params) < 0) {
     return rc;
