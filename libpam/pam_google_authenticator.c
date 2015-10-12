@@ -180,8 +180,10 @@ static char *get_secret_filename(pam_handle_t *pamh, Params *params,
         *pw->pw_dir != '/') {
     err:
       log_message(LOG_ERR, pamh, "Failed to compute location of secret file");
-      free(buf);
-      free(secret_filename);
+      if (buf)
+        free(buf);
+      if (secret_filename)
+        free(secret_filename);
       return NULL;
     }
   }
@@ -220,7 +222,7 @@ static char *get_secret_filename(pam_handle_t *pamh, Params *params,
     if (var) {
       size_t subst_len = strlen(subst);
       char *resized = realloc(secret_filename,
-                              strlen(secret_filename) + subst_len);
+                              strlen(secret_filename) + subst_len + 1);
       if (!resized) {
         goto err;
       }
@@ -681,8 +683,8 @@ static int set_cfg_value(pam_handle_t *pamh, Params *params,
     memcpy(resized, params->secret_buf, start - params->secret_buf);
     memcpy(resized + (start - params->secret_buf) + total_len, stop, tail_len + 1);
     memset(params->secret_buf, 0, buf_len);
-    free(params->secret_buf);
     start = start - params->secret_buf + resized;
+    free(params->secret_buf);
     params->secret_buf = resized;
   }
 
@@ -1553,7 +1555,6 @@ static int parse_args(pam_handle_t *pamh, int argc, const char **argv,
   int rc;
   for (int i = 0; i < argc; ++i) {
     if (!memcmp(argv[i], "secret=", 7)) {
-      free((void *)params->secret_filename_spec);
       params->secret_filename_spec = argv[i] + 7;
     } else if (!memcmp(argv[i], "user=", 5)) {
       uid_t uid;
