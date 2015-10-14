@@ -121,14 +121,15 @@ to disable it, you can do so on the module command line:
 
 ### no_increment_hotp
 
-Don't increment the counter for failed HOTP attempts. This is important if log
-attempts with failed passwords still get an OTP prompt.
+Don't increment the counter for failed HOTP attempts.  Normally you should set
+this so failed password attempts by an attacker without a token don't lock out
+the authorized user.
 
 ### nullok
 
 Allow users to log in without OTP, if they haven't set up OTP yet.
 
-### echo_verification_code
+### echo_verification_code / echo-verification-code
 
 By default, the PAM module does not echo the verification code when it is
 entered by the user. In some situations, the administrator might prefer a
