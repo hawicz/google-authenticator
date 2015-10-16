@@ -11,6 +11,8 @@ AC_CONFIG_HEADER(config.h)
 AC_PROG_CC
 AC_PROG_CC_STDC
 
+AX_APPEND_COMPILE_FLAGS([-Wall -Werror -fstack-protector])
+
 AC_CHECK_HEADERS([sys/fsuid.h])
 AC_CHECK_FUNCS([setfsuid])
 

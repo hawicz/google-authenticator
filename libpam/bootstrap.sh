@@ -1,2 +1,2 @@
 #!/bin/sh
-exec autoreconf -i
+exec autoreconf -i -Iautoconf-archive/m4
