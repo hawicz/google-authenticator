@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 			//printf("%s", result);
-			write(STDOUT_FILENO, result, retval);
+			if (write(STDOUT_FILENO, result, retval)) { /* squash gcc warnings */ }
 			fflush(stdout);
 			free(result);
 		}
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "base32_decode failed.  Input too long?\n");
 			exit(1);
 		}
-		write(STDOUT_FILENO, result, retval);
+		if (write(STDOUT_FILENO, result, retval)) { /* squash gcc warnings */ }
 	}
 	return 0;
 }
